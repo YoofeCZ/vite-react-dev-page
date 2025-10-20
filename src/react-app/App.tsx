@@ -103,26 +103,50 @@ const featureHighlights = [
   },
 ];
 
-const integrationLinks = [
+type IntegrationLink =
+  | {
+      label: string;
+      description: string;
+      kind: "external";
+      url: string;
+    }
+  | {
+      label: string;
+      description: string;
+      kind: "route";
+      route: Route;
+    };
+
+const integrationLinks: IntegrationLink[] = [
   {
     label: "Discord",
     description: "Live development chatter, patch notes and playtest coordination.",
+    kind: "external",
     url: "https://discord.gg/",
   },
   {
     label: "GitHub",
     description: "Transparent commit history with webhook powered release notes.",
+    kind: "external",
     url: "https://github.com/YoofeCZ/vite-react-dev-page",
   },
   {
     label: "Newsletter",
     description: "Gmail + n8n automations delivering milestone recaps and sneak peeks.",
+    kind: "external",
     url: "mailto:team@yourstudio.dev",
   },
   {
     label: "Forum",
     description: "Community hub for bug reports, feature requests and fan creations.",
-    url: "#forum",
+    kind: "route",
+    route: "forum",
+  },
+  {
+    label: "Admin Portal",
+    description: "Secure operations console available via /admin for pipeline configuration.",
+    kind: "route",
+    route: "admin",
   },
 ];
 
@@ -152,12 +176,49 @@ const unityActivityBadges: Record<UnityState, string> = {
 
 const navItems = [
   { id: "overview", label: "Overview" },
-  { id: "admin", label: "Admin" },
   { id: "forum", label: "Forum" },
   { id: "store", label: "Store" },
 ] as const;
 
-type AppView = (typeof navItems)[number]["id"];
+type SiteView = (typeof navItems)[number]["id"];
+type Route = SiteView | "admin";
+
+function normalizePathname(pathname: string) {
+  if (!pathname) {
+    return "/";
+  }
+  const normalized = pathname.replace(/\/+$/, "");
+  return normalized === "" ? "/" : normalized;
+}
+
+function routeFromPathname(pathname: string): Route {
+  const normalized = normalizePathname(pathname);
+  switch (normalized) {
+    case "/forum":
+      return "forum";
+    case "/store":
+      return "store";
+    case "/admin":
+      return "admin";
+    case "/":
+    default:
+      return "overview";
+  }
+}
+
+function pathnameFromRoute(route: Route) {
+  switch (route) {
+    case "forum":
+      return "/forum";
+    case "store":
+      return "/store";
+    case "admin":
+      return "/admin";
+    case "overview":
+    default:
+      return "/";
+  }
+}
 
 type HeroContent = {
   eyebrow: string;
@@ -165,12 +226,12 @@ type HeroContent = {
   accent: string;
   tagline: string;
   primaryAction?:
-    | { type: "view"; label: string; target: AppView }
+    | { type: "view"; label: string; target: Route }
     | { type: "link"; label: string; target: string };
   secondaryActionLabel: string;
 };
 
-const heroCopy: Record<AppView, HeroContent> = {
+const heroCopy: Record<SiteView, HeroContent> = {
   overview: {
     eyebrow: "Transparent pipeline",
     title: "Dev Command",
@@ -179,19 +240,6 @@ const heroCopy: Record<AppView, HeroContent> = {
       "Follow the journey in real-time across Unity sessions, GitHub activity, automation bridges and monetisation prep.",
     primaryAction: { type: "view", label: "Jump to store cockpit", target: "store" },
     secondaryActionLabel: "Trigger automation preview",
-  },
-  admin: {
-    eyebrow: "Operator workspace",
-    title: "Admin Control",
-    accent: " Deck",
-    tagline:
-      "Configure automation, content pipelines and moderation tooling without leaving the Cloudflare edge ecosystem.",
-    primaryAction: {
-      type: "link",
-      label: "Open Cloudflare D1",
-      target: "https://dash.cloudflare.com/?to=/:account/workers/d1",
-    },
-    secondaryActionLabel: "Simulate Discord ping",
   },
   forum: {
     eyebrow: "Community intelligence",
@@ -215,6 +263,20 @@ const heroCopy: Record<AppView, HeroContent> = {
     },
     secondaryActionLabel: "Dispatch launch teaser",
   },
+};
+
+const adminHero: HeroContent = {
+  eyebrow: "Operator workspace",
+  title: "Admin Control",
+  accent: " Deck",
+  tagline:
+    "Configure automation, content pipelines and moderation tooling without leaving the Cloudflare edge ecosystem.",
+  primaryAction: {
+    type: "link",
+    label: "Open Cloudflare D1",
+    target: "https://dash.cloudflare.com/?to=/:account/workers/d1",
+  },
+  secondaryActionLabel: "Simulate Discord ping",
 };
 
 const adminMetrics = [
@@ -420,14 +482,6 @@ const storeAutomation = [
 
 const isBrowser = typeof window !== "undefined";
 
-function parseViewFromHash(hash: string): AppView {
-  const normalized = hash.replace("#", "");
-  if (normalized === "admin" || normalized === "forum" || normalized === "store") {
-    return normalized;
-  }
-  return "overview";
-}
-
 function formatRelativeTime(lastUpdated: string) {
   const updated = new Date(lastUpdated).getTime();
   if (!Number.isFinite(updated) || updated <= 0) {
@@ -455,11 +509,11 @@ function App() {
   const [latestCommit, setLatestCommit] = useState<LatestCommit | null>(null);
   const [notificationResult, setNotificationResult] =
     useState<NotificationTriggerResponse | null>(null);
-  const [activeView, setActiveView] = useState<AppView>(() => {
+  const [route, setRoute] = useState<Route>(() => {
     if (!isBrowser) {
       return "overview";
     }
-    return parseViewFromHash(window.location.hash);
+    return routeFromPathname(window.location.pathname);
   });
   const [adminSettings, setAdminSettings] = useState({
     autoDiscord: true,
@@ -476,12 +530,20 @@ function App() {
     if (!isBrowser) {
       return;
     }
-    const handleHashChange = () => {
-      setActiveView(parseViewFromHash(window.location.hash));
+    const normalized = normalizePathname(window.location.pathname);
+    const derived = routeFromPathname(normalized);
+    const canonical = pathnameFromRoute(derived);
+    if (canonical !== normalized) {
+      window.history.replaceState(null, "", canonical);
+    }
+    setRoute(derived);
+
+    const handlePopState = () => {
+      setRoute(routeFromPathname(window.location.pathname));
     };
-    window.addEventListener("hashchange", handleHashChange);
-    handleHashChange();
-    return () => window.removeEventListener("hashchange", handleHashChange);
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
   useEffect(() => {
@@ -569,23 +631,22 @@ function App() {
     }
   }
 
-  function navigateTo(view: AppView) {
+  function navigate(to: Route) {
     if (!isBrowser) {
-      setActiveView(view);
+      setRoute(to);
       return;
     }
-    if (view === "overview") {
-      const url = `${window.location.pathname}${window.location.search}`;
-      window.history.replaceState(null, "", url);
-      setActiveView(view);
-    } else {
-      const hash = `#${view}`;
-      if (window.location.hash === hash) {
-        setActiveView(view);
-      } else {
-        window.location.hash = view;
-      }
+
+    const targetPath = pathnameFromRoute(to);
+    const currentPath = normalizePathname(window.location.pathname);
+    if (currentPath !== targetPath) {
+      window.history.pushState(null, "", targetPath);
     }
+    setRoute(to);
+
+    window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
   }
 
   function handleAdminSettingsToggle(key: "autoDiscord" | "autoNewsletter" | "showUnityScene") {
@@ -601,27 +662,37 @@ function App() {
     setLastAdminSave(new Date().toLocaleTimeString());
   }
 
-  const hero = heroCopy[activeView];
+  const isAdminRoute = route === "admin";
+  const hero = isAdminRoute ? adminHero : heroCopy[route as SiteView];
   const primaryAction = hero.primaryAction;
 
   return (
-    <div className="app-shell">
-      <nav className="primary-nav">
-        <button className="brand" type="button" onClick={() => navigateTo("overview")}> 
+    <div className={`app-shell${isAdminRoute ? " app-shell--admin" : ""}`}>
+      <nav className={`primary-nav${isAdminRoute ? " primary-nav--admin" : ""}`}>
+        <button className="brand" type="button" onClick={() => navigate("overview")}>
           Yoofe Dev Portal
+          {isAdminRoute ? <span className="brand__badge">Admin</span> : null}
         </button>
-        <div className="nav-links">
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              className={`nav-button${activeView === item.id ? " nav-button--active" : ""}`}
-              type="button"
-              onClick={() => navigateTo(item.id)}
-            >
-              {item.label}
+        {isAdminRoute ? (
+          <div className="nav-links nav-links--admin">
+            <button className="nav-button" type="button" onClick={() => navigate("overview")}>
+              ← Back to overview
             </button>
-          ))}
-        </div>
+          </div>
+        ) : (
+          <div className="nav-links">
+            {navItems.map((item) => (
+              <button
+                key={item.id}
+                className={`nav-button${route === item.id ? " nav-button--active" : ""}`}
+                type="button"
+                onClick={() => navigate(item.id)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        )}
       </nav>
 
       <header className="hero">
@@ -638,7 +709,7 @@ function App() {
                 <button
                   className="cta-button"
                   type="button"
-                  onClick={() => navigateTo(primaryAction.target)}
+                  onClick={() => navigate(primaryAction.target)}
                 >
                   {primaryAction.label}
                 </button>
@@ -710,7 +781,7 @@ function App() {
         </div>
       </header>
 
-      {activeView === "overview" ? (
+      {route === "overview" ? (
         <main className="content-grid">
           <section className="glass-card">
             <h2>Latest GitHub Activity</h2>
@@ -764,16 +835,29 @@ function App() {
             <h2>Community & Integrations</h2>
             <div className="integration-grid">
               {integrationLinks.map((integration) => (
-                <a
-                  key={integration.label}
-                  className="integration-card"
-                  href={integration.url}
-                  target={integration.url.startsWith("http") ? "_blank" : undefined}
-                  rel={integration.url.startsWith("http") ? "noreferrer" : undefined}
-                >
-                  <h3>{integration.label}</h3>
-                  <p>{integration.description}</p>
-                </a>
+                integration.kind === "external" ? (
+                  <a
+                    key={integration.label}
+                    className="integration-card"
+                    href={integration.url}
+                    target={integration.url.startsWith("http") ? "_blank" : undefined}
+                    rel={integration.url.startsWith("http") ? "noreferrer" : undefined}
+                  >
+                    <h3>{integration.label}</h3>
+                    <p>{integration.description}</p>
+                  </a>
+                ) : (
+                  <button
+                    key={integration.label}
+                    type="button"
+                    className="integration-card integration-card--button"
+                    onClick={() => navigate(integration.route)}
+                  >
+                    <h3>{integration.label}</h3>
+                    <p>{integration.description}</p>
+                    <span className="integration-card__hint">Opens {pathnameFromRoute(integration.route)}</span>
+                  </button>
+                )
               ))}
             </div>
           </section>
@@ -811,7 +895,7 @@ function App() {
         </main>
       ) : null}
 
-      {activeView === "admin" ? (
+      {route === "admin" ? (
         <main className="content-grid content-grid--admin">
           <section className="glass-card">
             <h2>Operations Pulse</h2>
@@ -922,7 +1006,7 @@ function App() {
         </main>
       ) : null}
 
-      {activeView === "forum" ? (
+      {route === "forum" ? (
         <main className="content-grid content-grid--forum">
           <section className="glass-card">
             <h2>Category Overview</h2>
@@ -1004,7 +1088,7 @@ function App() {
         </main>
       ) : null}
 
-      {activeView === "store" ? (
+      {route === "store" ? (
         <main className="content-grid content-grid--store">
           <section className="glass-card">
             <h2>Store Metrics</h2>
@@ -1088,6 +1172,7 @@ function App() {
           Built with Vite, React, Hono and deployed edge-first on Cloudflare. Unity, n8n and Discord integrations are ready for
           production secrets.
         </p>
+        <p>Operator console lives at /admin with a dedicated routing surface for configuration tasks.</p>
         <p>
           © {new Date().getFullYear()} Dev Command Center. Crafted by an indie team pushing AAA polish.
         </p>

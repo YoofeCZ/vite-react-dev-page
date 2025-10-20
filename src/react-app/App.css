@@ -5,6 +5,10 @@
   gap: 4rem;
 }
 
+.app-shell--admin {
+  gap: 3.5rem;
+}
+
 .primary-nav {
   display: flex;
   justify-content: space-between;
@@ -18,6 +22,11 @@
   border-bottom: 1px solid rgba(63, 255, 168, 0.18);
 }
 
+.primary-nav--admin {
+  background: linear-gradient(180deg, rgba(3, 14, 9, 0.92) 0%, rgba(3, 14, 9, 0.55) 100%);
+  border-bottom-color: rgba(63, 255, 168, 0.28);
+}
+
 .brand {
   font-size: 1rem;
   text-transform: uppercase;
@@ -29,10 +38,27 @@
   cursor: pointer;
 }
 
+.brand__badge {
+  margin-left: 0.6rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(63, 255, 168, 0.3);
+  background: rgba(7, 46, 29, 0.8);
+  font-size: 0.6rem;
+  letter-spacing: 0.15rem;
+  text-transform: uppercase;
+  color: rgba(120, 255, 193, 0.8);
+}
+
 .nav-links {
   display: flex;
   gap: 0.75rem;
   flex-wrap: wrap;
+}
+
+.nav-links--admin {
+  justify-content: flex-end;
+  margin-left: auto;
 }
 
 .nav-button {
@@ -270,6 +296,14 @@
   transition: transform 160ms ease, border 160ms ease;
 }
 
+.integration-card--button {
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  appearance: none;
+}
+
 .integration-card:hover {
   transform: translateY(-3px);
   border-color: rgba(63, 255, 168, 0.35);
@@ -277,6 +311,15 @@
 
 .integration-card h3 {
   margin: 0 0 0.5rem;
+}
+
+.integration-card__hint {
+  display: inline-block;
+  margin-top: 0.75rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.1rem;
+  text-transform: uppercase;
+  color: rgba(120, 255, 193, 0.6);
 }
 
 .commit {
