@@ -2,8 +2,8 @@
   font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  background: radial-gradient(circle at top left, #1b2345 0%, #090d1c 45%, #05060d 100%);
-  color: #e5ecff;
+  background: radial-gradient(circle at top left, #05281a 0%, #03140e 45%, #010807 100%);
+  color: #d1f4e8;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -11,12 +11,12 @@
 
 a {
   font-weight: 500;
-  color: rgba(132, 170, 255, 0.95);
+  color: rgba(63, 255, 168, 0.9);
   text-decoration: none;
 }
 
 a:hover {
-  color: rgba(158, 194, 255, 0.95);
+  color: rgba(120, 255, 193, 0.95);
 }
 
 body {

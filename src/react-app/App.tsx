@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
 import "./App.css";
 
 type UnityState = "working" | "break" | "offline";
@@ -122,48 +122,7 @@ const integrationLinks = [
   {
     label: "Forum",
     description: "Community hub for bug reports, feature requests and fan creations.",
-    url: "/forum",
-  },
-];
-
-const adminHighlights = [
-  {
-    title: "Observability Dashboard",
-    detail:
-      "Realtime stats for visitors, forum health and Unity focus hours backed by Cloudflare D1 analytics.",
-  },
-  {
-    title: "Content Pipeline",
-    detail:
-      "Headless CMS workflow with scheduled posts, SEO controls and media uploads to R2 buckets.",
-  },
-  {
-    title: "Store Operations",
-    detail:
-      "Stripe powered catalog, pre-order flows, discount automation and fulfillment state tracking.",
-  },
-  {
-    title: "Moderation Toolkit",
-    detail:
-      "Forum curation with ban lists, topic pinning, quick replies and Discord sync for staff alerts.",
-  },
-];
-
-const storeProducts = [
-  {
-    name: "Standard Edition",
-    price: "24.99€",
-    description: "Base game + exclusive Discord role on launch.",
-  },
-  {
-    name: "Deluxe Edition",
-    price: "39.99€",
-    description: "Includes soundtrack, concept art book and dynamic wallpapers.",
-  },
-  {
-    name: "Collector's Edition",
-    price: "59.99€",
-    description: "Physical loot crate with signed art prints and resin figurine.",
+    url: "#forum",
   },
 ];
 
@@ -190,6 +149,284 @@ const unityActivityBadges: Record<UnityState, string> = {
   break: "🟡 On a Break",
   offline: "⚫ Offline",
 };
+
+const navItems = [
+  { id: "overview", label: "Overview" },
+  { id: "admin", label: "Admin" },
+  { id: "forum", label: "Forum" },
+  { id: "store", label: "Store" },
+] as const;
+
+type AppView = (typeof navItems)[number]["id"];
+
+type HeroContent = {
+  eyebrow: string;
+  title: string;
+  accent: string;
+  tagline: string;
+  primaryAction?:
+    | { type: "view"; label: string; target: AppView }
+    | { type: "link"; label: string; target: string };
+  secondaryActionLabel: string;
+};
+
+const heroCopy: Record<AppView, HeroContent> = {
+  overview: {
+    eyebrow: "Transparent pipeline",
+    title: "Dev Command",
+    accent: " Nexus",
+    tagline:
+      "Follow the journey in real-time across Unity sessions, GitHub activity, automation bridges and monetisation prep.",
+    primaryAction: { type: "view", label: "Jump to store cockpit", target: "store" },
+    secondaryActionLabel: "Trigger automation preview",
+  },
+  admin: {
+    eyebrow: "Operator workspace",
+    title: "Admin Control",
+    accent: " Deck",
+    tagline:
+      "Configure automation, content pipelines and moderation tooling without leaving the Cloudflare edge ecosystem.",
+    primaryAction: {
+      type: "link",
+      label: "Open Cloudflare D1",
+      target: "https://dash.cloudflare.com/?to=/:account/workers/d1",
+    },
+    secondaryActionLabel: "Simulate Discord ping",
+  },
+  forum: {
+    eyebrow: "Community intelligence",
+    title: "Forum Steward",
+    accent: " Suite",
+    tagline:
+      "Curate conversations, review reports and surface feature requests flowing in from the player community.",
+    primaryAction: { type: "view", label: "Go to admin deck", target: "admin" },
+    secondaryActionLabel: "Send update broadcast",
+  },
+  store: {
+    eyebrow: "Commerce ready",
+    title: "Storefront",
+    accent: " Ops",
+    tagline:
+      "Track Stripe performance, fine-tune product tiers and sync fulfilment with n8n-driven automation.",
+    primaryAction: {
+      type: "link",
+      label: "Open Stripe dashboard",
+      target: "https://dashboard.stripe.com/test/payments",
+    },
+    secondaryActionLabel: "Dispatch launch teaser",
+  },
+};
+
+const adminMetrics = [
+  { label: "Visitors", value: "15 847", change: "+4.2%", tone: "positive" },
+  { label: "Forum Posts", value: "234", change: "+12 this week", tone: "positive" },
+  { label: "Pre-orders", value: "89", change: "↑ 6 overnight", tone: "positive" },
+  { label: "Unity Focus", value: "847 h", change: "+18 h this month", tone: "neutral" },
+] as const;
+
+const cmsQueue = [
+  {
+    title: "Devlog #27 — AI companion behaviours",
+    status: "Scheduled • Today 18:00 CET",
+  },
+  {
+    title: "Behind the Scenes: Concept Art Drop",
+    status: "Draft • Needs soundtrack embed",
+  },
+  {
+    title: "Patch Notes 0.5.1",
+    status: "Awaiting QA sign-off",
+  },
+];
+
+const automationRunbooks = [
+  {
+    name: "Milestone Broadcast",
+    detail: "Unity heartbeat → n8n → Discord + Gmail multi-channel ping.",
+  },
+  {
+    name: "Store Fulfilment",
+    detail: "Stripe webhook triggers R2 build upload and license email.",
+  },
+  {
+    name: "Forum Escalation",
+    detail: "High priority reports sync to admin Discord channel with context.",
+  },
+];
+
+const moderationTickets = [
+  {
+    user: "NovaFox",
+    summary: "Flagged exploit report in Bug Reports",
+    status: "In triage",
+  },
+  {
+    user: "Synthwave",
+    summary: "Fan art thread ready for spotlight",
+    status: "Scheduled",
+  },
+  {
+    user: "MythicByte",
+    summary: "Toxic reply escalated for review",
+    status: "Action required",
+  },
+];
+
+const forumCategories = [
+  {
+    name: "General Discussion",
+    threads: 128,
+    pinned: 3,
+    description: "Lore speculation, studio updates and dev AMAs.",
+    latest: "2 minutes ago by Kira",
+  },
+  {
+    name: "Bug Reports",
+    threads: 86,
+    pinned: 2,
+    description: "Issue tracking with repro templates synced to GitHub.",
+    latest: "8 minutes ago by Orik",
+  },
+  {
+    name: "Feature Requests",
+    threads: 61,
+    pinned: 4,
+    description: "Player-driven roadmap shaping automation triggers.",
+    latest: "15 minutes ago by Helix",
+  },
+  {
+    name: "Fan Art",
+    threads: 48,
+    pinned: 1,
+    description: "Concept pieces, renders and cosplay spotlights.",
+    latest: "32 minutes ago by Lumi",
+  },
+];
+
+const trendingThreads = [
+  {
+    title: "Should companions react to morale shifts?",
+    activity: "34 replies • 212 upvotes",
+    owner: "Kestrel",
+  },
+  {
+    title: "Speedrun build under 20 minutes!",
+    activity: "19 replies • 154 upvotes",
+    owner: "Rin",
+  },
+  {
+    title: "[BUG] Dialogue wheel softlock when alt-tabbing",
+    activity: "12 replies • 11 repros",
+    owner: "Delta",
+  },
+];
+
+const forumModerationQueue = [
+  {
+    item: "Lock spoiler thread after release",
+    resolution: "Auto-lock 48h post release via n8n",
+  },
+  {
+    item: "Archive outdated bug reports",
+    resolution: "Bulk close after GitHub issue status sync",
+  },
+  {
+    item: "Promote concept artist AMA",
+    resolution: "Pin + Discord broadcast",
+  },
+];
+
+const storeCatalog = [
+  {
+    name: "Standard Edition",
+    price: "24.99€",
+    includes: ["Base game", "Discord launch role"],
+    inventory: "Unlimited digital",
+  },
+  {
+    name: "Deluxe Edition",
+    price: "39.99€",
+    includes: ["Soundtrack", "Concept art book", "Dynamic wallpapers"],
+    inventory: "1 250 keys remaining",
+  },
+  {
+    name: "Collector's Edition",
+    price: "59.99€",
+    includes: ["Signed art prints", "Resin figurine", "Steelbook case"],
+    inventory: "Pre-order batch #2 shipping",
+  },
+];
+
+const merchItems = [
+  {
+    name: "Premium Tee",
+    price: "19.99€",
+    detail: "Organic cotton, glow-in-the-dark crest.",
+  },
+  {
+    name: "Poster Set",
+    price: "12.99€",
+    detail: "Set of three limited edition lithographs.",
+  },
+  {
+    name: "Sticker Pack",
+    price: "5.99€",
+    detail: "Holographic faction decals.",
+  },
+];
+
+const storeStats = [
+  { label: "Pre-orders", value: "89", detail: "+18 this week", tone: "positive" },
+  { label: "Conversion", value: "4.7%", detail: "↑ 0.6% vs last sprint", tone: "positive" },
+  { label: "Refund Rate", value: "0.4%", detail: "Stable", tone: "neutral" },
+  { label: "Avg. Basket", value: "37.12€", detail: "Includes bundles", tone: "neutral" },
+];
+
+const orderQueue = [
+  {
+    id: "ORD-1056",
+    customer: "Mira K.",
+    item: "Deluxe Edition",
+    status: "Ready for fulfilment",
+  },
+  {
+    id: "ORD-1052",
+    customer: "Leo A.",
+    item: "Collector's Edition",
+    status: "Awaiting figurine stock",
+  },
+  {
+    id: "ORD-1049",
+    customer: "Jin P.",
+    item: "Soundtrack Add-on",
+    status: "Delivered via email",
+  },
+];
+
+const storeAutomation = [
+  {
+    name: "Stripe checkout success",
+    detail: "Triggers license key email + Discord role assignment workflow.",
+  },
+  {
+    name: "Inventory threshold",
+    detail: "Alerts admin when Collector's Edition drops below 100 units.",
+  },
+  {
+    name: "Gumroad backup",
+    detail: "Mirrors digital extras for DRM-free customers.",
+  },
+];
+
+const isBrowser = typeof window !== "undefined";
+
+function parseViewFromHash(hash: string): AppView {
+  const normalized = hash.replace("#", "");
+  if (normalized === "admin" || normalized === "forum" || normalized === "store") {
+    return normalized;
+  }
+  return "overview";
+}
 
 function formatRelativeTime(lastUpdated: string) {
   const updated = new Date(lastUpdated).getTime();
@@ -218,6 +455,34 @@ function App() {
   const [latestCommit, setLatestCommit] = useState<LatestCommit | null>(null);
   const [notificationResult, setNotificationResult] =
     useState<NotificationTriggerResponse | null>(null);
+  const [activeView, setActiveView] = useState<AppView>(() => {
+    if (!isBrowser) {
+      return "overview";
+    }
+    return parseViewFromHash(window.location.hash);
+  });
+  const [adminSettings, setAdminSettings] = useState({
+    autoDiscord: true,
+    autoNewsletter: false,
+    showUnityScene: true,
+    maintenanceWindow: "Sunday 22:00 CET",
+  });
+  const [releaseNotesDraft, setReleaseNotesDraft] = useState(
+    "Preview: Collector's edition statues shipping schedule + bug fix round-up.",
+  );
+  const [lastAdminSave, setLastAdminSave] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isBrowser) {
+      return;
+    }
+    const handleHashChange = () => {
+      setActiveView(parseViewFromHash(window.location.hash));
+    };
+    window.addEventListener("hashchange", handleHashChange);
+    handleHashChange();
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -304,24 +569,92 @@ function App() {
     }
   }
 
+  function navigateTo(view: AppView) {
+    if (!isBrowser) {
+      setActiveView(view);
+      return;
+    }
+    if (view === "overview") {
+      const url = `${window.location.pathname}${window.location.search}`;
+      window.history.replaceState(null, "", url);
+      setActiveView(view);
+    } else {
+      const hash = `#${view}`;
+      if (window.location.hash === hash) {
+        setActiveView(view);
+      } else {
+        window.location.hash = view;
+      }
+    }
+  }
+
+  function handleAdminSettingsToggle(key: "autoDiscord" | "autoNewsletter" | "showUnityScene") {
+    setAdminSettings((prev) => ({ ...prev, [key]: !prev[key] }));
+  }
+
+  function handleMaintenanceChange(value: string) {
+    setAdminSettings((prev) => ({ ...prev, maintenanceWindow: value }));
+  }
+
+  function handleAdminSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setLastAdminSave(new Date().toLocaleTimeString());
+  }
+
+  const hero = heroCopy[activeView];
+  const primaryAction = hero.primaryAction;
+
   return (
     <div className="app-shell">
+      <nav className="primary-nav">
+        <button className="brand" type="button" onClick={() => navigateTo("overview")}> 
+          Yoofe Dev Portal
+        </button>
+        <div className="nav-links">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              className={`nav-button${activeView === item.id ? " nav-button--active" : ""}`}
+              type="button"
+              onClick={() => navigateTo(item.id)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </nav>
+
       <header className="hero">
         <div className="hero__content">
-          <p className="hero__eyebrow">Transparent game development pipeline</p>
+          <p className="hero__eyebrow">{hero.eyebrow}</p>
           <h1>
-            Dev Command Center<span className="accent">.</span>
+            {hero.title}
+            <span className="accent">{hero.accent}</span>
           </h1>
-          <p className="hero__tagline">
-            Follow the journey of the game in real-time across Unity, GitHub, community hubs and
-            the Cloudflare powered storefront.
-          </p>
+          <p className="hero__tagline">{hero.tagline}</p>
           <div className="hero__cta">
-            <a className="cta-button" href="/store">
-              Pre-order on the store
-            </a>
+            {primaryAction ? (
+              primaryAction.type === "view" ? (
+                <button
+                  className="cta-button"
+                  type="button"
+                  onClick={() => navigateTo(primaryAction.target)}
+                >
+                  {primaryAction.label}
+                </button>
+              ) : (
+                <a
+                  className="cta-button"
+                  href={primaryAction.target}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {primaryAction.label}
+                </a>
+              )
+            ) : null}
             <button className="cta-secondary" onClick={triggerDemoNotification} type="button">
-              Trigger automation preview
+              {hero.secondaryActionLabel}
             </button>
           </div>
           {notificationResult && (
@@ -377,137 +710,383 @@ function App() {
         </div>
       </header>
 
-      <main className="content-grid">
-        <section className="glass-card">
-          <h2>Latest GitHub Activity</h2>
-          {latestCommit ? (
-            <article className="commit">
-              <h3>{latestCommit.message}</h3>
-              <p className="commit__meta">
-                <span>Repository: {latestCommit.repository}</span>
-                <span>Author: {latestCommit.author}</span>
-                {latestCommit.branch ? <span>Branch: {latestCommit.branch}</span> : null}
-                <span>Committed {formatRelativeTime(latestCommit.committedAt)}</span>
-              </p>
-              <a className="inline-link" href={latestCommit.url} target="_blank" rel="noreferrer">
-                View commit →
-              </a>
-            </article>
-          ) : (
-            <p>No commits captured yet. Push to the main repository to populate this feed.</p>
-          )}
-        </section>
-
-        <section className="glass-card">
-          <h2>Progress Timeline</h2>
-          <ol className="timeline">
-            {milestoneTimeline.map((milestone) => (
-              <li key={milestone.title} className={`timeline__item timeline__item--${milestone.status}`}>
-                <div className="timeline__marker" />
-                <div>
-                  <h3>{milestone.title}</h3>
-                  <p>{milestone.description}</p>
-                  <span className="timeline__date">{milestone.date}</span>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        <section className="glass-card">
-          <h2>Game Snapshot</h2>
-          <div className="feature-grid">
-            {featureHighlights.map((feature) => (
-              <article key={feature.title}>
-                <h3>{feature.title}</h3>
-                <p>{feature.detail}</p>
+      {activeView === "overview" ? (
+        <main className="content-grid">
+          <section className="glass-card">
+            <h2>Latest GitHub Activity</h2>
+            {latestCommit ? (
+              <article className="commit">
+                <h3>{latestCommit.message}</h3>
+                <p className="commit__meta">
+                  <span>Repository: {latestCommit.repository}</span>
+                  <span>Author: {latestCommit.author}</span>
+                  {latestCommit.branch ? <span>Branch: {latestCommit.branch}</span> : null}
+                  <span>Committed {formatRelativeTime(latestCommit.committedAt)}</span>
+                </p>
+                <a className="inline-link" href={latestCommit.url} target="_blank" rel="noreferrer">
+                  View commit →
+                </a>
               </article>
-            ))}
-          </div>
-        </section>
+            ) : (
+              <p>No commits captured yet. Push to the main repository to populate this feed.</p>
+            )}
+          </section>
 
-        <section className="glass-card">
-          <h2>Community & Integrations</h2>
-          <div className="integration-grid">
-            {integrationLinks.map((integration) => (
-              <a
-                key={integration.label}
-                className="integration-card"
-                href={integration.url}
-                target={integration.url.startsWith("http") ? "_blank" : undefined}
-                rel={integration.url.startsWith("http") ? "noreferrer" : undefined}
-              >
-                <h3>{integration.label}</h3>
-                <p>{integration.description}</p>
-              </a>
-            ))}
-          </div>
-        </section>
+          <section className="glass-card">
+            <h2>Progress Timeline</h2>
+            <ol className="timeline">
+              {milestoneTimeline.map((milestone) => (
+                <li key={milestone.title} className={`timeline__item timeline__item--${milestone.status}`}>
+                  <div className="timeline__marker" />
+                  <div>
+                    <h3>{milestone.title}</h3>
+                    <p>{milestone.description}</p>
+                    <span className="timeline__date">{milestone.date}</span>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </section>
 
-        <section className="glass-card">
-          <h2>Admin Control Center</h2>
-          <div className="feature-grid">
-            {adminHighlights.map((item) => (
-              <article key={item.title}>
-                <h3>{item.title}</h3>
-                <p>{item.detail}</p>
-              </article>
-            ))}
-          </div>
-        </section>
+          <section className="glass-card">
+            <h2>Game Snapshot</h2>
+            <div className="feature-grid">
+              {featureHighlights.map((feature) => (
+                <article key={feature.title}>
+                  <h3>{feature.title}</h3>
+                  <p>{feature.detail}</p>
+                </article>
+              ))}
+            </div>
+          </section>
 
-        <section className="glass-card">
-          <h2>Game Store Preview</h2>
-          <div className="store-grid">
-            {storeProducts.map((product) => (
-              <article key={product.name} className="store-card">
-                <header>
-                  <h3>{product.name}</h3>
-                  <span className="store-card__price">{product.price}</span>
-                </header>
-                <p>{product.description}</p>
-                <p className="store-card__meta">Stripe Checkout • Instant key delivery</p>
-              </article>
-            ))}
-          </div>
-        </section>
+          <section className="glass-card">
+            <h2>Community & Integrations</h2>
+            <div className="integration-grid">
+              {integrationLinks.map((integration) => (
+                <a
+                  key={integration.label}
+                  className="integration-card"
+                  href={integration.url}
+                  target={integration.url.startsWith("http") ? "_blank" : undefined}
+                  rel={integration.url.startsWith("http") ? "noreferrer" : undefined}
+                >
+                  <h3>{integration.label}</h3>
+                  <p>{integration.description}</p>
+                </a>
+              ))}
+            </div>
+          </section>
 
-        <section className="glass-card">
-          <h2>Automation Pipelines</h2>
-          <ul className="automation-list">
-            {automationPipelines.map((pipeline) => (
-              <li key={pipeline.name}>
-                <h3>{pipeline.name}</h3>
-                <p>{pipeline.description}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="glass-card">
-          <h2>Unity Activity Chronicle</h2>
-          {unityStatus.history.length > 0 ? (
-            <ul className="activity-list">
-              {unityStatus.history.map((entry) => (
-                <li key={entry.id}>
-                  <span className={`activity-badge activity-badge--${entry.state}`}>
-                    {unityActivityBadges[entry.state]}
-                  </span>
-                  <p>{entry.label}</p>
-                  <time dateTime={entry.timestamp}>{formatRelativeTime(entry.timestamp)}</time>
+          <section className="glass-card">
+            <h2>Automation Pipelines</h2>
+            <ul className="automation-list">
+              {automationPipelines.map((pipeline) => (
+                <li key={pipeline.name}>
+                  <h3>{pipeline.name}</h3>
+                  <p>{pipeline.description}</p>
                 </li>
               ))}
             </ul>
-          ) : (
-            <p>As soon as the Unity editor connects, a rich timeline of activity will appear here.</p>
-          )}
-        </section>
-      </main>
+          </section>
+
+          <section className="glass-card">
+            <h2>Unity Activity Chronicle</h2>
+            {unityStatus.history.length > 0 ? (
+              <ul className="activity-list">
+                {unityStatus.history.map((entry) => (
+                  <li key={entry.id}>
+                    <span className={`activity-badge activity-badge--${entry.state}`}>
+                      {unityActivityBadges[entry.state]}
+                    </span>
+                    <p>{entry.label}</p>
+                    <time dateTime={entry.timestamp}>{formatRelativeTime(entry.timestamp)}</time>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>As soon as the Unity editor connects, a rich timeline of activity will appear here.</p>
+            )}
+          </section>
+        </main>
+      ) : null}
+
+      {activeView === "admin" ? (
+        <main className="content-grid content-grid--admin">
+          <section className="glass-card">
+            <h2>Operations Pulse</h2>
+            <div className="metrics-grid">
+              {adminMetrics.map((metric) => (
+                <article key={metric.label} className={`metric-card metric-card--${metric.tone}`}>
+                  <h3>{metric.value}</h3>
+                  <p>{metric.label}</p>
+                  <span>{metric.change}</span>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="glass-card">
+            <h2>Content Pipeline</h2>
+            <ul className="queue-list">
+              {cmsQueue.map((item) => (
+                <li key={item.title}>
+                  <h3>{item.title}</h3>
+                  <p>{item.status}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="glass-card">
+            <h2>Automation Runbooks</h2>
+            <ul className="automation-list">
+              {automationRunbooks.map((runbook) => (
+                <li key={runbook.name}>
+                  <h3>{runbook.name}</h3>
+                  <p>{runbook.detail}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="glass-card">
+            <h2>Moderation Radar</h2>
+            <ul className="queue-list queue-list--compact">
+              {moderationTickets.map((ticket) => (
+                <li key={ticket.user}>
+                  <div>
+                    <h3>{ticket.user}</h3>
+                    <p>{ticket.summary}</p>
+                  </div>
+                  <span className="tag tag--alert">{ticket.status}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="glass-card">
+            <h2>Configuration</h2>
+            <form className="admin-form" onSubmit={handleAdminSubmit}>
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={adminSettings.autoDiscord}
+                  onChange={() => handleAdminSettingsToggle("autoDiscord")}
+                />
+                <span>Auto-send Discord alerts when Unity session starts</span>
+              </label>
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={adminSettings.autoNewsletter}
+                  onChange={() => handleAdminSettingsToggle("autoNewsletter")}
+                />
+                <span>Queue Gmail newsletter draft for every milestone</span>
+              </label>
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={adminSettings.showUnityScene}
+                  onChange={() => handleAdminSettingsToggle("showUnityScene")}
+                />
+                <span>Expose Unity scene name publicly on the homepage</span>
+              </label>
+
+              <label className="admin-form__field">
+                <span>Maintenance window</span>
+                <input
+                  type="text"
+                  value={adminSettings.maintenanceWindow}
+                  onChange={(event) => handleMaintenanceChange(event.target.value)}
+                />
+              </label>
+
+              <label className="admin-form__field">
+                <span>Release notes draft</span>
+                <textarea
+                  rows={4}
+                  value={releaseNotesDraft}
+                  onChange={(event) => setReleaseNotesDraft(event.target.value)}
+                />
+              </label>
+
+              <button className="cta-button" type="submit">
+                Save configuration
+              </button>
+              {lastAdminSave ? (
+                <p className="form-save">Saved locally at {lastAdminSave}</p>
+              ) : null}
+            </form>
+          </section>
+        </main>
+      ) : null}
+
+      {activeView === "forum" ? (
+        <main className="content-grid content-grid--forum">
+          <section className="glass-card">
+            <h2>Category Overview</h2>
+            <div className="feature-grid feature-grid--forum">
+              {forumCategories.map((category) => (
+                <article key={category.name}>
+                  <header className="feature-grid__header">
+                    <h3>{category.name}</h3>
+                    <span className="tag">{category.threads} threads</span>
+                  </header>
+                  <p>{category.description}</p>
+                  <footer className="feature-grid__footer">
+                    <span>{category.pinned} pinned</span>
+                    <span>{category.latest}</span>
+                  </footer>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="glass-card">
+            <h2>Trending Threads</h2>
+            <ul className="queue-list queue-list--compact">
+              {trendingThreads.map((thread) => (
+                <li key={thread.title}>
+                  <div>
+                    <h3>{thread.title}</h3>
+                    <p>by {thread.owner}</p>
+                  </div>
+                  <span className="tag">{thread.activity}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="glass-card">
+            <h2>Moderator Playbook</h2>
+            <ul className="automation-list">
+              {forumModerationQueue.map((item) => (
+                <li key={item.item}>
+                  <h3>{item.item}</h3>
+                  <p>{item.resolution}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="glass-card">
+            <h2>Search Filters</h2>
+            <form className="admin-form admin-form--filters" onSubmit={(event) => event.preventDefault()}>
+              <label className="admin-form__field">
+                <span>Keyword</span>
+                <input type="search" placeholder="e.g. dialogue, crash, soundtrack" />
+              </label>
+              <label className="admin-form__field">
+                <span>Category</span>
+                <select defaultValue="all">
+                  <option value="all">All</option>
+                  {forumCategories.map((category) => (
+                    <option key={category.name} value={category.name}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="admin-form__field">
+                <span>Status</span>
+                <select defaultValue="open">
+                  <option value="open">Open</option>
+                  <option value="in-progress">In Progress</option>
+                  <option value="resolved">Resolved</option>
+                </select>
+              </label>
+              <button className="cta-secondary" type="submit">
+                Apply filters
+              </button>
+            </form>
+          </section>
+        </main>
+      ) : null}
+
+      {activeView === "store" ? (
+        <main className="content-grid content-grid--store">
+          <section className="glass-card">
+            <h2>Store Metrics</h2>
+            <div className="metrics-grid">
+              {storeStats.map((stat) => (
+                <article key={stat.label} className={`metric-card metric-card--${stat.tone}`}>
+                  <h3>{stat.value}</h3>
+                  <p>{stat.label}</p>
+                  <span>{stat.detail}</span>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="glass-card">
+            <h2>Product Catalogue</h2>
+            <div className="store-grid">
+              {storeCatalog.map((product) => (
+                <article key={product.name} className="store-card">
+                  <header>
+                    <h3>{product.name}</h3>
+                    <span className="store-card__price">{product.price}</span>
+                  </header>
+                  <ul className="store-card__list">
+                    {product.includes.map((include) => (
+                      <li key={include}>{include}</li>
+                    ))}
+                  </ul>
+                  <p className="store-card__meta">{product.inventory}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="glass-card">
+            <h2>Merch Lineup</h2>
+            <div className="feature-grid feature-grid--merch">
+              {merchItems.map((item) => (
+                <article key={item.name}>
+                  <h3>{item.name}</h3>
+                  <p>{item.detail}</p>
+                  <span className="store-card__price">{item.price}</span>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="glass-card">
+            <h2>Order Queue</h2>
+            <ul className="queue-list queue-list--compact">
+              {orderQueue.map((order) => (
+                <li key={order.id}>
+                  <div>
+                    <h3>{order.id}</h3>
+                    <p>
+                      {order.customer} — {order.item}
+                    </p>
+                  </div>
+                  <span className="tag">{order.status}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="glass-card">
+            <h2>Automation Hooks</h2>
+            <ul className="automation-list">
+              {storeAutomation.map((hook) => (
+                <li key={hook.name}>
+                  <h3>{hook.name}</h3>
+                  <p>{hook.detail}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </main>
+      ) : null}
 
       <footer className="footer">
         <p>
-          Built with Vite, React, Hono and deployed edge-first on Cloudflare. Unity, n8n and
-          Discord integrations are ready for production secrets.
+          Built with Vite, React, Hono and deployed edge-first on Cloudflare. Unity, n8n and Discord integrations are ready for
+          production secrets.
         </p>
         <p>
           © {new Date().getFullYear()} Dev Command Center. Crafted by an indie team pushing AAA polish.

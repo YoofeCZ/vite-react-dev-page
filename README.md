@@ -1,18 +1,17 @@
 # Dev Command Center
 
-A full-stack game development portal combining **Vite + React** on the frontend with a **Hono** API deployed to **Cloudflare Workers**. The site delivers a glassmorphism, dark-themed dashboard that showcases Unity editor presence, GitHub commits, community touch-points and e-commerce previews — all designed for transparent indie game production.
+A full-stack game development portal combining **Vite + React** on the frontend with a **Hono** API deployed to **Cloudflare Workers**. The site now ships with a dark emerald, glassmorphism presentation layer that spans an overview dashboard, an operator-grade admin console, a community forum steward view and a store operations cockpit — all tuned for transparent indie game production.
 
 ![Hero preview](https://imagedelivery.net/wSMYJvS3Xw-n339CbDyDIA/fc7b4b62-442b-4769-641b-ad4422d74300/public)
 
 ## Features
 
 ### Frontend (Vite + React)
-- **Real-time Unity status** card with active task, scene, session hours and productivity streak.
-- **GitHub feed** surfaces the latest commit received from webhook payloads.
-- **Progress timeline** tracks milestones from prototype to early-access launch.
-- **Game showcase** with feature highlights, store catalogue preview and automation pipelines.
-- **Community integrations** linking Discord, forum, newsletter and admin tooling.
-- Responsive glassmorphism layout tuned for Cloudflare Pages deployment.
+- **Overview dashboard** with real-time Unity status, GitHub commits, milestone timeline and automation visualisations.
+- **Admin deck (/admin)** exposing visitor analytics, content queues, moderation radar and configuration controls for Discord/Gmail/n8n workflows.
+- **Forum suite (/forum)** with category insights, trending threads, moderator playbook and actionable search filters.
+- **Store operations (/store)** surfacing Stripe metrics, product catalogue, merch lineup, fulfilment queue and automation hooks.
+- Dark emerald glassmorphism styling with neon accent navigation and responsive layouts tuned for Cloudflare Pages.
 
 ### Backend (Hono on Cloudflare Workers)
 - `POST /api/unity-status` — accepts Unity editor heartbeats and task updates.

@@ -42,7 +42,7 @@ graph TD
 | Cloudflare R2 | Stores screenshots, marketing videos, downloadable builds and static assets served via the CDN. |
 | n8n | Orchestrates cross-service automation spanning Discord alerts, Gmail newsletters and store fulfilment. |
 | Stripe Checkout | Handles secure purchases and issues license keys through webhook callbacks to the Worker. |
-| React Frontend | Glassmorphism UI that visualises activity, milestones, store catalogue and community integrations. |
+| React Frontend | Multi-surface (overview, admin, forum, store) glassmorphism UI with live Unity presence, automation controls and commerce tooling. |
 
 ## Deployment flow
 
