@@ -3,6 +3,10 @@
 // Runtime types generated with workerd@1.20250617.0 2025-10-08 nodejs_compat
 declare namespace Cloudflare {
 	interface Env {
+		UNITY_STATUS_KV?: KVNamespace;
+		COMMIT_CACHE_KV?: KVNamespace;
+		N8N_WEBHOOK_URL?: string;
+		DB?: D1Database;
 	}
 }
 interface Env extends Cloudflare.Env {}

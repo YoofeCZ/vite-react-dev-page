@@ -1,90 +1,80 @@
-# React + Vite + Hono + Cloudflare Workers
+# Dev Command Center
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/templates/tree/main/vite-react-template)
+A full-stack game development portal combining **Vite + React** on the frontend with a **Hono** API deployed to **Cloudflare Workers**. The site delivers a glassmorphism, dark-themed dashboard that showcases Unity editor presence, GitHub commits, community touch-points and e-commerce previews — all designed for transparent indie game production.
 
-This template provides a minimal setup for building a React application with TypeScript and Vite, designed to run on Cloudflare Workers. It features hot module replacement, ESLint integration, and the flexibility of Workers deployments.
+![Hero preview](https://imagedelivery.net/wSMYJvS3Xw-n339CbDyDIA/fc7b4b62-442b-4769-641b-ad4422d74300/public)
 
-![React + TypeScript + Vite + Cloudflare Workers](https://imagedelivery.net/wSMYJvS3Xw-n339CbDyDIA/fc7b4b62-442b-4769-641b-ad4422d74300/public)
+## Features
 
-<!-- dash-content-start -->
+### Frontend (Vite + React)
+- **Real-time Unity status** card with active task, scene, session hours and productivity streak.
+- **GitHub feed** surfaces the latest commit received from webhook payloads.
+- **Progress timeline** tracks milestones from prototype to early-access launch.
+- **Game showcase** with feature highlights, store catalogue preview and automation pipelines.
+- **Community integrations** linking Discord, forum, newsletter and admin tooling.
+- Responsive glassmorphism layout tuned for Cloudflare Pages deployment.
 
-🚀 Supercharge your web development with this powerful stack:
+### Backend (Hono on Cloudflare Workers)
+- `POST /api/unity-status` — accepts Unity editor heartbeats and task updates.
+- `GET /api/unity-status` — returns the most recent session snapshot.
+- `POST /api/github-webhook` — ingests GitHub push events and caches the head commit.
+- `GET /api/latest-commit` — exposes the cached commit for the frontend widget.
+- `POST /api/trigger-notification` — fan-out hook for n8n/Discord/Gmail automations.
+- Cloudflare KV integration for Unity presence + commit cache with in-memory fallback for local dev.
 
-- [**React**](https://react.dev/) - A modern UI library for building interactive interfaces
-- [**Vite**](https://vite.dev/) - Lightning-fast build tooling and development server
-- [**Hono**](https://hono.dev/) - Ultralight, modern backend framework
-- [**Cloudflare Workers**](https://developers.cloudflare.com/workers/) - Edge computing platform for global deployment
+### Unity Editor Plugin
+- `unity/DevStatusTracker.cs` provides a custom **Dev Status Tracker** window.
+- Sends manual or automatic (2-minute heartbeat) updates to the Worker endpoint.
+- Tracks session duration, weekly hours and productive streak; persists metrics in `EditorPrefs`.
+- Exposes quick controls for switching between working/break states.
 
-### ✨ Key Features
-
-- 🔥 Hot Module Replacement (HMR) for rapid development
-- 📦 TypeScript support out of the box
-- 🛠️ ESLint configuration included
-- ⚡ Zero-config deployment to Cloudflare's global network
-- 🎯 API routes with Hono's elegant routing
-- 🔄 Full-stack development setup
-- 🔎 Built-in Observability to monitor your Worker
-
-Get started in minutes with local development or deploy directly via the Cloudflare dashboard. Perfect for building modern, performant web applications at the edge.
-
-<!-- dash-content-end -->
+### Automation & Data Architecture
+- [Mermaid architecture diagram](docs/architecture.md) covering Unity, Workers, KV, D1, R2, n8n and Stripe flows.
+- Ready for D1-backed forum/store/admin modules with Cloudflare R2 media distribution.
+- Notification orchestration prepared for Discord + Gmail via n8n bridge webhooks.
 
 ## Getting Started
 
-To start a new project with this template, run:
-
-```bash
-npm create cloudflare@latest -- --template=cloudflare/templates/vite-react-template
-```
-
-A live deployment of this template is available at:
-[https://react-vite-template.templates.workers.dev](https://react-vite-template.templates.workers.dev)
-
-## Development
-
-Install dependencies:
-
 ```bash
 npm install
-```
-
-Start the development server with:
-
-```bash
 npm run dev
 ```
 
-Your application will be available at [http://localhost:5173](http://localhost:5173).
+The Vite dev server runs at [http://localhost:5173](http://localhost:5173). It proxies API requests to the co-located Worker during development.
 
-## Production
-
-Build your project for production:
+## API Development
 
 ```bash
-npm run build
+npm run dev:worker   # if defined via package script, otherwise use `npx wrangler dev`
 ```
 
-Preview your build locally:
+Environment bindings used by the Worker:
 
-```bash
-npm run preview
-```
+| Variable | Purpose |
+| --- | --- |
+| `UNITY_STATUS_KV` | KV namespace for live Unity status cache. Optional during local development. |
+| `COMMIT_CACHE_KV` | KV namespace storing the latest commit payload. Optional during local development. |
+| `N8N_WEBHOOK_URL` | Optional automation webhook target (Discord/Gmail workflows). |
 
-Deploy your project to Cloudflare Workers:
+Without KV bindings the Worker falls back to in-memory storage, ideal for testing.
 
-```bash
-npm run build && npm run deploy
-```
+## Unity Integration
 
-Monitor your workers:
+1. Copy `unity/DevStatusTracker.cs` into your Unity project under an `Editor` folder.
+2. Open **Window → Dev Status Tracker** inside Unity.
+3. Configure the Cloudflare Worker URL (e.g. `https://your-domain.com/api/unity-status`).
+4. Start a working session, set the active task and the plugin will post heartbeats automatically.
 
-```bash
-npx wrangler tail
-```
+## Deployment
 
-## Additional Resources
+- Frontend: Deploy via **Cloudflare Pages** connected to this repository.
+- API: Deploy via **Wrangler** (`npm run deploy`) to Cloudflare Workers with KV + D1 bindings.
+- Automation: Point Unity/GitHub/N8n/Stripe webhooks to the deployed Worker endpoints.
 
-- [Cloudflare Workers Documentation](https://developers.cloudflare.com/workers/)
-- [Vite Documentation](https://vitejs.dev/guide/)
-- [React Documentation](https://reactjs.org/)
-- [Hono Documentation](https://hono.dev/)
+## Documentation
+
+- [System architecture](docs/architecture.md)
+- [Unity editor plugin](unity/DevStatusTracker.cs)
+
+---
+Crafted for transparent indie game development with end-to-end automation hooks.
